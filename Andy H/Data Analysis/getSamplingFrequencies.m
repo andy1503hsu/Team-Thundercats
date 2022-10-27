@@ -12,10 +12,12 @@ function image_timings = getSamplingFrequencies(image_timings, experimentName)
     image_timings.infrared_freq = infrared_freq;
     image_timings.lidar_freq = lidar_freq;
 
+    %{
     disp(newline + "Sampling rate of cameras for " + experimentName + ":")
     
     fprintf("%25s%-20s%-20s%-20s\n", "", "Avg secs/image", "Std Dev", "Hz")
     fprintf("%10s%-15s%-20.6f%-20.6f%-20.6f\n", "", "Visible:", 1/visible_freq, visible_std, visible_freq)
     fprintf("%10s%-15s%-20.6f%-20.6f%-20.6f\n", "", "Infrared:", 1/infrared_freq, infrared_std, infrared_freq)
     fprintf("%10s%-15s%-20.6f%-20.6f%-20.6f\n", "", "Lidar:", 1/lidar_freq, lidar_std, lidar_freq)
+    %}
 end

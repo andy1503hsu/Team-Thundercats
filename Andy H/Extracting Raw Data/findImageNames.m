@@ -69,5 +69,6 @@ function imagery_data = findImageNames(type, experimentName)
                 fprintf("%12s %-30s\n", "", imagery_data.lidar_other(index))
             end
         end
+        fprintf("\n")
     end
 end
