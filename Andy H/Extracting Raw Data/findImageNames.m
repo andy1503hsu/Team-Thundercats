@@ -1,4 +1,4 @@
-function imagery_data = getImageryData(type, experimentName)
+function imagery_data = findImageNames(type, experimentName)
     fprintf("%20s %-10s\n", "Looking at type:", type)
     fprintf("%20s %-10s\n\n", "Experiment name:", experimentName)
     
@@ -13,6 +13,10 @@ function imagery_data = getImageryData(type, experimentName)
     elseif type == "fog"
         path = "Glenn I Data\Fog Data\" + experimentName + "\" + experimentName;
         folders = dir(path);
+        if isempty(folders)  % Might be this one too
+            path = "Glenn I Data\Fog Data\" + experimentName;
+            folders = dir(path);
+        end
     else
         disp("Invalid type. Code terminated.")
         return
@@ -40,7 +44,14 @@ function imagery_data = getImageryData(type, experimentName)
         fprintf("%10d %-30s\n", length(imagery_data.infrared), "infrared images (.tiff)")
         fprintf("%10d %-30s\n", length(imagery_data.metadata), "metadata file (.csv)")
         fprintf("%10d %-30s\n", length(imagery_data.visIR_other), "other files")
+        if ~isempty(imagery_data.visIR_other)
+            for index = 1:length(imagery_data.visIR_other)
+                fprintf("%12s %-30s\n", "", imagery_data.visIR_other(index))
+            end
+        end
         fprintf("\n")
+
+
         files = dir(path + "\Lidar\*");
         files = string(extractfield(files, "name"))';
         files(files == "." | files == "..") = [];  % Eliminate "." (refers to itself) and ".." (parent folder)
@@ -53,5 +64,10 @@ function imagery_data = getImageryData(type, experimentName)
         fprintf("%10d %-30s\n", length(imagery_data.lidar_csvs), ".csv files")
         fprintf("%10d %-30s\n", length(imagery_data.lidar_pngs), ".png files")
         fprintf("%10d %-30s\n", length(imagery_data.lidar_other), "other files")
+        if ~isempty(imagery_data.lidar_other)
+            for index = 1:length(imagery_data.lidar_other)
+                fprintf("%12s %-30s\n", "", imagery_data.lidar_other(index))
+            end
+        end
     end
 end

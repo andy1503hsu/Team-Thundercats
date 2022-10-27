@@ -1,6 +1,9 @@
-function [first_time, times_zeroed] = getLidarTimes(imagery_data)
-    all_numbers = str2double(cell2string(regexp(imagery_data.lidar_csvs, "\d*", "match")));
-
+%% Get and return lidar timing data, as well as sort lidar files
+function [first_time, times_zeroed, sorted_lidar_csvs] = getLidarTimes(lidar_csvs)
+    all_numbers = str2double(cell2string(regexp(lidar_csvs, "\d*", "match")));
+    [~, order] = sort(all_numbers(:, 1));  % Sort by frame #
+    all_numbers = all_numbers(order, :);
+    sorted_lidar_csvs = lidar_csvs(order);
     % Naming convention of the Lidar file dictates 8 separate numbers
     % 1st: Frame #
     % 2-4: Year, Month, Day
@@ -21,7 +24,9 @@ function [first_time, times_zeroed] = getLidarTimes(imagery_data)
 
     times = hour*60*60 + minute*60 + second + millisecond/1e3;
 
-    first_time = times(1);
+    ft = all_numbers(1, 2:end);  % 1 x 7 double array with the first entry
+    first_time = datetime(ft(1), ft(2), ft(3), ft(4), ft(5), ft(6), ft(7));  % datetime
+    first_time = posixtime(first_time);  % Unix time (what we want)
     times_zeroed = times - times(1);
 end
 
