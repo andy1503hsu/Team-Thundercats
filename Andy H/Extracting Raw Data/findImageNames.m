@@ -8,14 +8,17 @@ function imagery_data = findImageNames(type, experimentName)
     % https://www.mathworks.com/help/matlab/matlab_env/specify-file-names.html
     
     if type == "baseline"
-        path = "Glenn I Data\Baseline Data\" + experimentName + "\" + experimentName;
-        folders = dir(path);
+        path_to_images = "Glenn I Data\Baseline Data\" + experimentName + "\" + experimentName;
+        addpath(genpath(path_to_images))
+        folders = dir(path_to_images);
     elseif type == "fog"
-        path = "Glenn I Data\Fog Data\" + experimentName + "\" + experimentName;
-        folders = dir(path);
+        path_to_images = "Glenn I Data\Fog Data\" + experimentName + "\" + experimentName;
+        addpath(genpath(path_to_images))
+        folders = dir(path_to_images);
         if isempty(folders)  % Might be this one too
-            path = "Glenn I Data\Fog Data\" + experimentName;
-            folders = dir(path);
+            path_to_images = "Glenn I Data\Fog Data\" + experimentName;
+            addpath(genpath(path_to_images))
+            folders = dir(path_to_images);
         end
     else
         disp("Invalid type. Code terminated.")
@@ -29,7 +32,7 @@ function imagery_data = findImageNames(type, experimentName)
         disp("Experiment found!")
         disp(newline + "In this folder, there are: ")
     
-        files = dir(path + "\Database\*");
+        files = dir(path_to_images + "\Database\*");
         files = string(extractfield(files, "name"))';
         files(files == "." | files == "..") = [];  % Eliminate "." (refers to itself) and ".." (parent folder)
         imagery_data.visible = files(endsWith(files, ".jpg"));
@@ -52,7 +55,7 @@ function imagery_data = findImageNames(type, experimentName)
         fprintf("\n")
 
 
-        files = dir(path + "\Lidar\*");
+        files = dir(path_to_images + "\Lidar\*");
         files = string(extractfield(files, "name"))';
         files(files == "." | files == "..") = [];  % Eliminate "." (refers to itself) and ".." (parent folder)
         imagery_data.lidar_csvs = files(endsWith(files, ".csv"));

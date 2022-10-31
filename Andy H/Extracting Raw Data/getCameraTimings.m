@@ -17,15 +17,6 @@ function [imagery_data, image_timings] = getCameraTimings(imagery_data)
 
     minTimes = [first_time_visible, first_time_infrared, first_time_lidar];
     
-    %{
-    datetime(first_time_visible, "ConvertFrom", "posixtime")
-    datetime(first_time_infrared, "ConvertFrom", "posixtime")
-    datetime(first_time_lidar, "ConvertFrom", "posixtime")
-
-    datetime(first_time_visible + times_zeroed_visible(end), "ConvertFrom", "posixtime")
-    datetime(first_time_infrared + times_zeroed_infrared(end), "ConvertFrom", "posixtime")
-    datetime(first_time_lidar + times_zeroed_lidar(end), "ConvertFrom", "posixtime")
-    %}
     [~, minIndex] = min(minTimes);
     
     if minIndex == 1  % Visible was first
