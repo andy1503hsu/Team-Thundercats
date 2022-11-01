@@ -60,13 +60,36 @@ end
 %%
 % save('intense.mat', 'intensity');
 load('intense.mat');
-sec_cycle = 1.03^-1;
+sec_cycle = 1.3^-1;
 a = 0:sec_cycle:(length(intensity)-1)*sec_cycle;
 figure;
 
-plot(a, intensity)
+
+
+plot(a(1,1:end-22), intensity(1,1:end-22))
 xlabel('time (s)')
 ylabel('intensity (w/m^2)')
+title('Intensity vs. Time')
+
+
+y = sgolayfilt(intensity',3,31)
+
+
+figure;
+plot(a(1,1:end-22), y(1:end-22,1))
+xlabel('time (s)')
+ylabel('intensity (w/m^2)')
+title('Filtered Intensity vs. Time')
+
+flux = diff(y)/sec_cycle; 
+
+
+figure;
+plot(a(1,1:end-31), flux(1:end-30,1))
+xlabel('time (s)')
+ylabel('flux (w/m^2*s)')
+title('Flux (From filtered Intensity Spectrum)')
+
 
 
 
