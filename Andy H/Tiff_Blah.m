@@ -17,5 +17,17 @@ timing_info = getSamplingFrequencies(timing_info, experimentName);
 
 %% Display Stuff
 printTimingInfo(timing_info, experimentName, "off");
-%%
-plotTimings(timing_info, experimentName);
+
+%% Load in a .tiff file
+tiff_file = Tiff(imagery_data.infrared(1))
+tiff_file.getVersion
+
+%% Number of image directories
+% Default "IFD" is 1, and lastDirectory() outputs true
+currentDirectory(tiff_file)
+lastDirectory(tiff_file)
+
+%% Details about the 1 IFD
+tiff_info = imfinfo(imagery_data.infrared(1))
+
+tiff_file.getTag("Photometric") % 1, which corresponds to MinIsBlack (grayscale)
