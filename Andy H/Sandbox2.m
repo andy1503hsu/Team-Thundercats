@@ -8,7 +8,7 @@ close all
 
 %% What experiment to look at?
 type = "fog";              % "baseline" or "fog"
-experimentName = "fog01";   % "baseline01", "baseline02", "fog01", etc.
+experimentName = "fog16";   % "baseline01", "baseline02", "fog01", etc.
 
 %% Get imagery (visible, IR, lidar) data and timings
 imagery_data = findImageNames(type, experimentName);
@@ -18,8 +18,8 @@ imagery_data = findImageNames(type, experimentName);
 
 %% Have to change this line every experiment
 % To access lidar point clouds
-original_folder = "Glenn I Data\Fog Data\" + experimentName + ...
-                  "\" + experimentName + "\Lidar\";
+original_folder = "Glenn I Data\Fog Data\" ...% + experimentName + "\" ...
+                  + experimentName + "\Lidar\";
 
 % Create new folder (in Box) for condensing shenanigans
 new_folder = "Glenn I Data\Andy Blah\" + experimentName + "_condensed\";
@@ -54,35 +54,53 @@ oldFolderStats.infraredFreq = 1/mean(diff(timing_info.infrared));
 
 save(new_folder + "Old Folder Stats.mat", "oldFolderStats")
 
+%% Interpolate first, then last, then ... images
+orderInterp = zeros(1, timingInfo.numImages);
+
+firstCouple = 1:floor(timingInfo.numImages/10):timingInfo.numImages;
+if firstCouple(end) ~= timingInfo.numImages
+    firstCouple(end + 1) = timingInfo.numImages;
+end
+orderInterp(1:length(firstCouple)) = firstCouple;
+
+others = 1:timingInfo.numImages;
+
+orderInterp(length(firstCouple)+1:end) = setdiff(1:timingInfo.numImages, firstCouple);
 %%
-% Pre-loop things
-% Get tiff info (if needed)
-tiff_info = Tiff(imagery_data.infrared(1));
-%%
+startImage = 1901; % Hardcode this
+correspondingIndex = find(orderInterp == startImage, 1, "first");
+
 startTime = tic();
 
-for numLidarImage = 1:length(timing_info.lidar)
+for index = correspondingIndex:length(timing_info.lidar)
+    numLidarImage = orderInterp(index);
     disp("Interpolating image " + numLidarImage + " of " + length(timing_info.lidar))
     lidar_time = timing_info.lidar(numLidarImage);
 
     % Get relevant indexes for closest before/after images (visible + IR)
-    visible_beforeIndex = find(timing_info.visible < lidar_time, 1, "last");
-    visible_afterIndex = find(timing_info.visible > lidar_time, 1, "first");
+    vis_beforeIndex = find(timing_info.visible < lidar_time, 1, "last");
+    vis_afterIndex = find(timing_info.visible > lidar_time, 1, "first");
 
     ir_beforeIndex = find(timing_info.infrared < lidar_time, 1, "last");
     ir_afterIndex = find(timing_info.infrared > lidar_time, 1, "first");
 
+    if isempty(ir_beforeIndex) || isempty(ir_afterIndex) || isempty(vis_afterIndex) || isempty(vis_beforeIndex)
+        disp("No 'before' and 'after' pair, skipping this image...")
+        disp(newline)
+        continue
+    end
+
     % Load in images
-    vis_before = imread(imagery_data.visible(visible_beforeIndex));
-    vis_after = imread(imagery_data.visible(visible_afterIndex));
+    vis_before = imread(imagery_data.visible(vis_beforeIndex));
+    vis_after = imread(imagery_data.visible(vis_afterIndex));
 
     ir_before = read(Tiff(imagery_data.infrared(ir_beforeIndex)));
     ir_after = read(Tiff(imagery_data.infrared(ir_afterIndex)));
 
     % Get interpolated image data (the rgb / greyscale values)
     % Weight is in-between 0 and 1 (0 is before image, 1 is after image)
-    vis_weight = (lidar_time - timing_info.visible(visible_beforeIndex)) / ...
-                        diff(timing_info.visible([visible_beforeIndex visible_afterIndex]));
+    vis_weight = (lidar_time - timing_info.visible(vis_beforeIndex)) / ...
+                        diff(timing_info.visible([vis_beforeIndex vis_afterIndex]));
     ir_weight = (lidar_time - timing_info.infrared(ir_beforeIndex)) / ...
                        diff(timing_info.infrared([ir_beforeIndex ir_afterIndex]));
 
@@ -103,9 +121,10 @@ for numLidarImage = 1:length(timing_info.lidar)
 
     disp("Image " + numLidarImage + " successfully interpolated.")
 
-    estTotalTime = toc(startTime) / numLidarImage * length(timing_info.lidar);
+    estTotalTime = toc(startTime) / (index - correspondingIndex + 1) * (length(timing_info.lidar) - correspondingIndex + 1);
     timeElapsed = toc(startTime);
-    fprintf("Estimated remaining time: %.2f sec\n\n", estTotalTime - timeElapsed)
+    fprintf("Images remaining: %g\n", length(timing_info.lidar) - index)
+    fprintf("Estimated remaining time: %.2f sec\n\n", (estTotalTime - timeElapsed))
 end
 
 %%
