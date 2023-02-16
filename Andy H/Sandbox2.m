@@ -67,64 +67,74 @@ others = 1:timingInfo.numImages;
 
 orderInterp(length(firstCouple)+1:end) = setdiff(1:timingInfo.numImages, firstCouple);
 %%
-startImage = 1901; % Hardcode this
+startImage = 2000; % Hardcode this
 correspondingIndex = find(orderInterp == startImage, 1, "first");
 
 startTime = tic();
 
-for index = correspondingIndex:length(timing_info.lidar)
-    numLidarImage = orderInterp(index);
-    disp("Interpolating image " + numLidarImage + " of " + length(timing_info.lidar))
-    lidar_time = timing_info.lidar(numLidarImage);
-
-    % Get relevant indexes for closest before/after images (visible + IR)
-    vis_beforeIndex = find(timing_info.visible < lidar_time, 1, "last");
-    vis_afterIndex = find(timing_info.visible > lidar_time, 1, "first");
-
-    ir_beforeIndex = find(timing_info.infrared < lidar_time, 1, "last");
-    ir_afterIndex = find(timing_info.infrared > lidar_time, 1, "first");
-
-    if isempty(ir_beforeIndex) || isempty(ir_afterIndex) || isempty(vis_afterIndex) || isempty(vis_beforeIndex)
-        disp("No 'before' and 'after' pair, skipping this image...")
+index = correspondingIndex;
+while index <= length(timing_info.lidar)
+%for index = correspondingIndex:length(timing_info.lidar)
+    try
+        numLidarImage = orderInterp(index);
+        disp("Interpolating image " + numLidarImage + " of " + length(timing_info.lidar))
+        lidar_time = timing_info.lidar(numLidarImage);
+    
+        % Get relevant indexes for closest before/after images (visible + IR)
+        vis_beforeIndex = find(timing_info.visible < lidar_time, 1, "last");
+        vis_afterIndex = find(timing_info.visible > lidar_time, 1, "first");
+    
+        ir_beforeIndex = find(timing_info.infrared < lidar_time, 1, "last");
+        ir_afterIndex = find(timing_info.infrared > lidar_time, 1, "first");
+    
+        if isempty(ir_beforeIndex) || isempty(ir_afterIndex) || isempty(vis_afterIndex) || isempty(vis_beforeIndex)
+            disp("No 'before' and 'after' pair, skipping this image...")
+            disp(newline)
+            continue
+        end
+    
+        % Load in images
+        vis_before = imread(imagery_data.visible(vis_beforeIndex));
+        vis_after = imread(imagery_data.visible(vis_afterIndex));
+    
+        ir_before = read(Tiff(imagery_data.infrared(ir_beforeIndex)));
+        ir_after = read(Tiff(imagery_data.infrared(ir_afterIndex)));
+    
+        % Get interpolated image data (the rgb / greyscale values)
+        % Weight is in-between 0 and 1 (0 is before image, 1 is after image)
+        vis_weight = (lidar_time - timing_info.visible(vis_beforeIndex)) / ...
+                            diff(timing_info.visible([vis_beforeIndex vis_afterIndex]));
+        ir_weight = (lidar_time - timing_info.infrared(ir_beforeIndex)) / ...
+                           diff(timing_info.infrared([ir_beforeIndex ir_afterIndex]));
+    
+        % Weight of 0 means interp = before, weight of 1 means interp = after
+        vis_interp = vis_before + vis_weight*(vis_after - vis_before);
+        ir_interp = ir_before + ir_weight*(ir_after - ir_before);
+    
+        % Write interpolated image (let's see how this goes...)
+        vis_name = new_folder + "Visible" + numLidarImage + ".jpg";
+        ir_name = new_folder + "Infrared" + numLidarImage + ".tiff";
+    
+        imwrite(vis_interp, vis_name)
+        imwrite(ir_interp, ir_name)
+    
+        % Add lidar file to folder, but renamed
+        lidar_name = new_folder + "Lidar" + numLidarImage + ".csv";
+        copyfile(original_folder + imagery_data.lidar_csvs(numLidarImage), lidar_name)
+    
+        disp("Image " + numLidarImage + " successfully interpolated.")
+    
+        estTotalTime = toc(startTime) / (index - correspondingIndex + 1) * (length(timing_info.lidar) - correspondingIndex + 1);
+        timeElapsed = toc(startTime);
+        fprintf("Images remaining: %g\n", length(timing_info.lidar) - index)
+        fprintf("Estimated remaining time: %.2f sec\n\n", (estTotalTime - timeElapsed))
+        index = index + 1;
+    catch
+        disp("Got an error somewhere! Waiting 30 seconds before rerunning...")
+        pause(30)
         disp(newline)
-        continue
     end
 
-    % Load in images
-    vis_before = imread(imagery_data.visible(vis_beforeIndex));
-    vis_after = imread(imagery_data.visible(vis_afterIndex));
-
-    ir_before = read(Tiff(imagery_data.infrared(ir_beforeIndex)));
-    ir_after = read(Tiff(imagery_data.infrared(ir_afterIndex)));
-
-    % Get interpolated image data (the rgb / greyscale values)
-    % Weight is in-between 0 and 1 (0 is before image, 1 is after image)
-    vis_weight = (lidar_time - timing_info.visible(vis_beforeIndex)) / ...
-                        diff(timing_info.visible([vis_beforeIndex vis_afterIndex]));
-    ir_weight = (lidar_time - timing_info.infrared(ir_beforeIndex)) / ...
-                       diff(timing_info.infrared([ir_beforeIndex ir_afterIndex]));
-
-    % Weight of 0 means interp = before, weight of 1 means interp = after
-    vis_interp = vis_before + vis_weight*(vis_after - vis_before);
-    ir_interp = ir_before + ir_weight*(ir_after - ir_before);
-
-    % Write interpolated image (let's see how this goes...)
-    vis_name = new_folder + "Visible" + numLidarImage + ".jpg";
-    ir_name = new_folder + "Infrared" + numLidarImage + ".tiff";
-
-    imwrite(vis_interp, vis_name)
-    imwrite(ir_interp, ir_name)
-
-    % Add lidar file to folder, but renamed
-    lidar_name = new_folder + "Lidar" + numLidarImage + ".csv";
-    copyfile(original_folder + imagery_data.lidar_csvs(numLidarImage), lidar_name)
-
-    disp("Image " + numLidarImage + " successfully interpolated.")
-
-    estTotalTime = toc(startTime) / (index - correspondingIndex + 1) * (length(timing_info.lidar) - correspondingIndex + 1);
-    timeElapsed = toc(startTime);
-    fprintf("Images remaining: %g\n", length(timing_info.lidar) - index)
-    fprintf("Estimated remaining time: %.2f sec\n\n", (estTotalTime - timeElapsed))
 end
 
 %%
