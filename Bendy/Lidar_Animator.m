@@ -35,8 +35,9 @@ for i = 1:length(C)
     if az < -180
         az = 180;
     end
-    view([az 30])
-    drawnow
+    view([az 30]) %changes view point
+      %writes figure to a gif
+      drawnow
       frame = getframe(1);
       im = frame2im(frame);
       [imind,cm] = rgb2ind(im,256);
