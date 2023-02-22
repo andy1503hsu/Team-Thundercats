@@ -13,7 +13,9 @@ function [imagery_data, image_timings] = getCameraTimings(imagery_data)
 
     first_time_visible = first_time_visible - 6*60*60; % 6 hours ahead of trans/malvern data (the actually accurate one)
     first_time_infrared = first_time_infrared - 6*60*60; % 6 hours ahead of trans/malvern data (the actually accurate one)
-    first_time_lidar = first_time_lidar + 60*60; % 1 hour behind of trans/malvern data (the actually accurate one)
+    
+    %% UGH SOMETHING CHANGED WITH THE TIMING ISSUE, fog16 doesn't require this 1 hr adjustment for lidar
+    %first_time_lidar = first_time_lidar + 60*60; % 1 hour behind of trans/malvern data (the actually accurate one)
 
     minTimes = [first_time_visible, first_time_infrared, first_time_lidar];
     
