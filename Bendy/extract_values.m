@@ -49,13 +49,14 @@ if len == 0
 end
 C = {};
 for i = 1:len
-    in_temp = 0;
     opts = detectImportOptions(name_sort(i),'Range',range);  %still have to specify the full range
 %     opts.SelectedVariableNames = opts.SelectedVariableNames([1 2]);
 %     %can turn on to ignore cols
-    C = [C; table2array(readtable(name_sort(i), opts))];
+    temp = table2array(readtable(name_sort(i), opts));
+    C = [C; temp];
+    temp = 0;
     clc;
-    fprintf('%f percent files read', (i/length(name))*100)
+    fprintf('%f files read', (i))
 end
     fprintf('\n')
 end
