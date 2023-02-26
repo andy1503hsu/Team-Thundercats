@@ -8,7 +8,7 @@ close all
 
 %% What experiment to look at?
 type = "fog";              % "baseline" or "fog"
-experimentName = "fog16";   % "baseline01", "baseline02", "fog01", etc.
+experimentName = "fog01";   % "baseline01", "baseline02", "fog01", etc.
 
 %% Get imagery (visible, IR, lidar) data and timings
 imagery_data = findImageNames(type, experimentName);
@@ -18,7 +18,7 @@ imagery_data = findImageNames(type, experimentName);
 
 %% Have to change this line every experiment
 % To access lidar point clouds
-original_folder = "Glenn I Data\Fog Data\" ...% + experimentName + "\" ...
+original_folder = "Glenn I Data\Fog Data\"  + experimentName + "\" ...
                   + experimentName + "\Lidar\";
 
 % Create new folder (in Box) for condensing shenanigans
@@ -67,7 +67,7 @@ others = 1:timingInfo.numImages;
 
 orderInterp(length(firstCouple)+1:end) = setdiff(1:timingInfo.numImages, firstCouple);
 %%
-startImage = 2000; % Hardcode this
+startImage = 1663; % Hardcode this
 correspondingIndex = find(orderInterp == startImage, 1, "first");
 
 startTime = tic();
@@ -89,6 +89,7 @@ while index <= length(timing_info.lidar)
     
         if isempty(ir_beforeIndex) || isempty(ir_afterIndex) || isempty(vis_afterIndex) || isempty(vis_beforeIndex)
             disp("No 'before' and 'after' pair, skipping this image...")
+            index = index + 1;
             disp(newline)
             continue
         end
