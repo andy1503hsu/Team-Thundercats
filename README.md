@@ -3,7 +3,7 @@
 ## Things to do, software wise
 *This is in order of the neural network, not in order of importance / difficulty*
 
-*----Data pre-processing steps that occur prior to training*
+### *Data pre-processing steps that occur prior to training*
 1. Download and unzip data from Box
 2. Time interpolate the lidar/visible/infrared data. This includes:
 - Ensuring that each lidar point cloud has a time-corresponding visible and infrared image. This also helps in **reducing memory requirements**, as the visible and infrared cameras took pictures at a signficantly higher sampling rate (~9 Hz compared to <2 Hz) than the lidar camera.
@@ -15,7 +15,7 @@
 - It might actually be better to do 4 before 3 due to filters being wonky at the edges
 
 
-*----Part of our ML framework / neural network architecture*
+### *Part of our ML framework / neural network architecture*
 1. **Feature Extraction Things**
 - Develop algorithms to feature extract a quantification of blurriness from visible, infrared, and lidar data
 - Also involves things like cropping out the walls from lidar point clouds
@@ -23,10 +23,12 @@
 - After feature extraction, how many layers do we want to the neural network before it gives us the estimated transmissometer/Malvern data?
 - What optimizer/loss function do we want to use?
 
-*----Related to training the neural network*
+### *Related to training the neural network*
 1. How do decide what data goes in the training set and what goes in the validation/testing set?
-2. Anything else?
 
+### Then train the neural network!
+
+-------------------------------------------------------------------------------------------------------------
 
 ## What is left to download into Box?
 *Update this to reflect changes!*
