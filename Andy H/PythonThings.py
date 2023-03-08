@@ -42,9 +42,11 @@ def laplace_filtering(img_list):
     return vari, max_val
 
 
+'''
 def get_fft_stats(img_data):
     img_trans = np.absolute(np.fft.fft2(img_data))
     return (np.var(img_trans), np.amax(img_trans))
+'''
 
 
 def get_fft_stats(img_data):
