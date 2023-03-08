@@ -7,19 +7,16 @@ close all
 
 
 %% What experiment to look at?
-type = "fog";              % "baseline" or "fog"
-experimentName = "fog01";   % "baseline01", "baseline02", "fog01", etc.
+type = "baseline";              % "baseline" or "fog"
+experimentName = "baseline11";   % "baseline01", "baseline02", "fog01", etc.
 
 %% Get imagery (visible, IR, lidar) data and timings
 imagery_data = findImageNames(type, experimentName);
 [imagery_data, timing_info] = getCameraTimings(imagery_data);
 
 %% For every lidar image -- produce an interpolated visible and IR image
-
-%% Have to change this line every experiment
 % To access lidar point clouds
-original_folder = "Glenn I Data\Fog Data\"  + experimentName + "\" ...
-                  + experimentName + "\Lidar\";
+original_folder = imagery_data.path + "\Lidar\";
 
 % Create new folder (in Box) for condensing shenanigans
 new_folder = "Glenn I Data\Andy Blah\" + experimentName + "_condensed\";
@@ -67,7 +64,7 @@ others = 1:timingInfo.numImages;
 
 orderInterp(length(firstCouple)+1:end) = setdiff(1:timingInfo.numImages, firstCouple);
 %%
-startImage = 1663; % Hardcode this
+startImage = 1; % Hardcode this
 correspondingIndex = find(orderInterp == startImage, 1, "first");
 
 startTime = tic();

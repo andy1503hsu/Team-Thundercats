@@ -25,6 +25,8 @@ function imagery_data = findImageNames(type, experimentName)
         return
     end
     
+    imagery_data.path = path_to_images;
+    
     if isempty(folders)
         disp("No experiment corresponds to this type/name match. Code terminated.")
         return

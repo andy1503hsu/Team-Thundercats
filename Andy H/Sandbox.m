@@ -4,7 +4,7 @@ close all
 
 %% What experiment to look at?
 type = "baseline";              % "baseline" or "fog"
-experimentName = "baseline01";   % "baseline01", "baseline02", "fog01", etc.
+experimentName = "baseline11";   % "baseline01", "baseline02", "fog01", etc.
 
 %% Get imagery (visible, IR, lidar) and instrument (trans/Malvern) data and timings
 imagery_data = findImageNames(type, experimentName);

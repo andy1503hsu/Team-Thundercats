@@ -11,11 +11,32 @@ function [imagery_data, image_timings] = getCameraTimings(imagery_data)
     imagery_data.infrared = sorted_infrared;
     imagery_data.lidar_csvs = sorted_lidar_csvs;
 
-    first_time_visible = first_time_visible - 6*60*60; % 6 hours ahead of trans/malvern data (the actually accurate one)
-    first_time_infrared = first_time_infrared - 6*60*60; % 6 hours ahead of trans/malvern data (the actually accurate one)
+    %{
+    datetime([first_time_visible; first_time_infrared; first_time_lidar], "ConvertFrom", "posixtime")
+    %}
+
+    %% Adjust so cameras are on lidar time zone
+    % Adjustment to "correct" time zone (transmissometer / Malvern time
+    % zone) will occur post-interpolation
+
+    hour_diff = round((first_time_visible - first_time_lidar) / 60 / 60);
+    % Positive hour_diff means that visible was ahead, negative hour_diff
+    % means that lidar was ahead
+
+    if hour_diff > 0
+        first_time_visible = first_time_visible - hour_diff*60*60;
+        first_time_infrared = first_time_infrared - hour_diff*60*60;
+    elseif hour_diff < 0
+        first_time_visible = first_time_visible + hour_diff*60*60;
+        first_time_infrared = first_time_infrared + hour_diff*60*60;
+    end % If hour_diff == 0, do nothing
+
+    
+    %first_time_visible = first_time_visible - 6*60*60; % 6 hours ahead of trans/malvern data (the actually accurate one)
+    %first_time_infrared = first_time_infrared - 6*60*60; % 6 hours ahead of trans/malvern data (the actually accurate one)
     
     %% UGH SOMETHING CHANGED WITH THE TIMING ISSUE, fog16 doesn't require this 1 hr adjustment for lidar
-    first_time_lidar = first_time_lidar + 60*60; % 1 hour behind of trans/malvern data (the actually accurate one)
+    %first_time_lidar = first_time_lidar + 60*60; % 1 hour behind of trans/malvern data (the actually accurate one)
 
     minTimes = [first_time_visible, first_time_infrared, first_time_lidar];
     
