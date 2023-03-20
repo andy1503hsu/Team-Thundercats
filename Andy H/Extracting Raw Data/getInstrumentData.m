@@ -1,5 +1,5 @@
 function [instrument_data, timing_info] = getInstrumentData(experimentName, timing_info)
-    if ismember(experimentName, ["baseline0" + (1:2), "fog01"])
+    if ismember(experimentName, ["baseline0" + (1:4), "fog0" + (1:4)])
         fog_data = load("sriram/src/files/fog_properties_20210511.mat");
     end
     [hr, min, sec] = hms([timing_info.firstTimeDatetime; timing_info.lastTimeDatetime]);

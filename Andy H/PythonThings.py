@@ -68,7 +68,8 @@ matFile = scipy.io.loadmat(matFilePath + matFileName, squeeze_me=True)
 
 df = pd.DataFrame(matFile['doubles'], columns=["timeSinceStart",
                                                "MOR_meters",
-                                               "MeanVD_microns"])
+                                               "MeanVD_microns",
+                                               "LWC_gm-3"])
 df["ImageIndex"] = matFile['imageNumbers']
 
 

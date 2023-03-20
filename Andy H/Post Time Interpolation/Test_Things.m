@@ -12,7 +12,7 @@ imageryData = getTMData(imageryData);
 %% Convert imageryData from MATLAB table to other things
 %imageNumbers = [imageryData.visible imageryData.infrared imageryData.lidar];
 imageNumbers = other.imageNumbers;
-doubles = [imageryData.timeSinceStart imageryData.mor532_meter imageryData.meanVD_microns];
+doubles = [imageryData.timeSinceStart imageryData.mor532_meter imageryData.meanVD_microns imageryData.LWC_gramPerMeter3];
 
 %{
 %% Figure out some things

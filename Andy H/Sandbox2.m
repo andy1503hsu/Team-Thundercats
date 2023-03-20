@@ -5,10 +5,9 @@ close all
 % No need to have so many visible/infrared images since lidar took pictures
 % at lower frequency
 
-
 %% What experiment to look at?
-type = "baseline";              % "baseline" or "fog"
-experimentName = "baseline11";   % "baseline01", "baseline02", "fog01", etc.
+type = "fog";              % "baseline" or "fog"
+experimentName = "fog04";   % "baseline01", "baseline02", "fog01", etc.
 
 %% Get imagery (visible, IR, lidar) data and timings
 imagery_data = findImageNames(type, experimentName);
@@ -19,7 +18,7 @@ imagery_data = findImageNames(type, experimentName);
 original_folder = imagery_data.path + "\Lidar\";
 
 % Create new folder (in Box) for condensing shenanigans
-new_folder = "Glenn I Data\Andy Blah\" + experimentName + "_condensed\";
+new_folder = "Glenn I Data\Post-Time Interpolation Data\" + experimentName + "_condensed\";
 mkdir(new_folder)
 
 % Test copy file mechanism
@@ -125,7 +124,7 @@ while index <= length(timing_info.lidar)
         estTotalTime = toc(startTime) / (index - correspondingIndex + 1) * (length(timing_info.lidar) - correspondingIndex + 1);
         timeElapsed = toc(startTime);
         fprintf("Images remaining: %g\n", length(timing_info.lidar) - index)
-        fprintf("Estimated remaining time: %.2f sec\n\n", (estTotalTime - timeElapsed))
+        fprintf("Estimated remaining time: %.2f min\n\n", (estTotalTime - timeElapsed)/60)
         index = index + 1;
     catch
         disp("Got an error somewhere! Waiting 30 seconds before rerunning...")
