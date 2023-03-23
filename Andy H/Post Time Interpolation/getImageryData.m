@@ -22,12 +22,13 @@ function [imagery_data, other] = getImageryData(experimentName)
     files = string(extractfield(files, "name"))';
     files(files == "." | files == "..") = [];  % Eliminate "." (refers to itself) and ".." (parent folder)
     files(files == "test_copyfile.csv") = [];  % Ignore this .csv
+    files(files == "test_copyfile.tiff") = [];  % Ignore this .csv
 
     % Time interpolation ensures first and last index of all three types of
     % images are the same
-    [visible, ~, ~] = sortImageNames(files(endsWith(files, ".jpg")));
-    [infrared, ~, ~] = sortImageNames(files(endsWith(files, ".tiff")));
-    [lidar, firstIndex, lastIndex] = sortImageNames(files(endsWith(files, ".csv")));
+    [visible, ~, ~] = sortImageNames(files(endsWith(files, ".jpg") & startsWith(files, "Visible")));
+    [infrared, ~, ~] = sortImageNames(files(endsWith(files, ".tiff") & startsWith(files, "Infrared")));
+    [lidar, firstIndex, lastIndex] = sortImageNames(files(endsWith(files, ".csv") & startsWith(files, "Lidar")));
 
     indexes = firstIndex:lastIndex;
     other.imageNumbers = indexes;
