@@ -3,16 +3,11 @@ clc
 close all
 %% Test getImageryData.m
 clc
-experimentName = "fog16";
+experimentName = "baseline08";  % Change this line to "fog16", "baseline01", etc.
 [imageryData, other] = getImageryData(experimentName);
 
 %% Get Transmissometer and Malvern Data
 imageryData = getTMData(imageryData);
-
-%% Convert imageryData from MATLAB table to other things
-%imageNumbers = [imageryData.visible imageryData.infrared imageryData.lidar];
-imageNumbers = other.imageNumbers;
-doubles = [imageryData.timeSinceStart imageryData.mor532_meter imageryData.meanVD_microns imageryData.LWC_gramPerMeter3];
 
 %{
 %% Figure out some things

@@ -2,7 +2,7 @@ function [imagery_data, other] = getImageryData(experimentName)
     tic;
     fprintf("%40s %-10s\n", "Finding data for:", experimentName)
 
-    interpolatedFolder = "Andy Blah"; % Might want to change this at some point lmao
+    interpolatedFolder = "Post-Time Interpolation Data";
     path = "Glenn I Data\" + interpolatedFolder + "\" +  experimentName + "_condensed";
     addpath(genpath(path))
     files = dir(path);
@@ -92,7 +92,7 @@ end
 % These times are directly from the NASA documentation (not inferred
 % through the image capture times within the provided datasets)
 function [startDatetime, length] = getStartTime(experimentName)
-    load("Start of Experiment Info.mat", "combined")
+    load("Start of Experiments Info.mat", "combined")
     
     rowNum = combined.TestName == experimentName;
     startDatetime = combined.StartDatetime(rowNum);

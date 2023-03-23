@@ -1,4 +1,8 @@
 % Add time-corresponding transmissometer and Malvern data to the table
+% After some analysis, it was determined that meteorological optical range
+% (MOR) and liquid water content (LWC) were the two variables that best 
+% quantify the dissipation of fog in the Fog Chamber.
+
 function imageryData = getTMData(imageryData)
 
     disp("Getting time-corresponding transmissometer and Malvern data...")
@@ -20,8 +24,8 @@ function imageryData = getTMData(imageryData)
 
     if ~isempty(day == [11 12 13 14])
         load("Glenn I Data\fog_chamber_environment_\fog_chamber_environment_\fog_properties_202105" + day + ".mat", ...
-             'LWC', 'MOR532', 'numberDisNorm', 'diameters', 'time')
-        load("Glenn I Data\fog_chamber_environment_\fog_chamber_environment_\NASA_Malvern\NASA_202105" + day + "_RawOutput.mat", 'data1')
+             'LWC', 'MOR532', 'time') %, 'numberDisNorm', 'diameters')
+        %load("Glenn I Data\fog_chamber_environment_\fog_chamber_environment_\NASA_Malvern\NASA_202105" + day + "_RawOutput.mat", 'data1')
     else
         disp("Invalid day of testing. Code terminated.")
         return
@@ -31,10 +35,11 @@ function imageryData = getTMData(imageryData)
     time_first3 = time;             % Time for LWC, mor532, and meanVD
     LWC = LWC;                      % LWC does not need to be modified
     mor532 = MOR532(:, 1);          % First column out of 4-column matrix
-    meanVD = sum(diameters .* numberDisNorm, 2);
 
-    time_medianVD = data1(:, 1); % Time for medianVD
-    medianVD = data1(:, 3);
+    % Other potential variables to use...
+    % meanVD = sum(diameters .* numberDisNorm, 2);
+    % time_medianVD = data1(:, 1); % Time for medianVD
+    % medianVD = data1(:, 3);
 
     % Seconds past midnight of test day when the image was taken
     imageSeconds = hour(imageryData.imageDatetime)*60*60 + ...
@@ -43,15 +48,16 @@ function imageryData = getTMData(imageryData)
 
     LWC_interpolated = interpolateData(time_first3, LWC, imageSeconds);
     mor532_interpolated = interpolateData(time_first3, mor532, imageSeconds);
-    meanVD_interpolated = interpolateData(time_first3, meanVD, imageSeconds);
-    medianVD_interpolated = interpolateData(time_first3, medianVD, imageSeconds);
+    
+    % meanVD_interpolated = interpolateData(time_first3, meanVD, imageSeconds);
+    % medianVD_interpolated = interpolateData(time_first3, medianVD, imageSeconds);
 
     imageryData.mor532_meter = mor532_interpolated;
-    imageryData.meanVD_microns = meanVD_interpolated;
-    
-    % Might be investigated later on
     imageryData.LWC_gramPerMeter3 = LWC_interpolated;
-    imageryData.medianVD_microns = medianVD_interpolated;
+
+
+    % imageryData.meanVD_microns = meanVD_interpolated;    
+    % imageryData.medianVD_microns = medianVD_interpolated;
 
     disp("Successful -- See imageryData for updated table.")
 end
