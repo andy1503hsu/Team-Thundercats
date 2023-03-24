@@ -8,6 +8,8 @@ from PIL import Image
 from pathlib import Path
 
 
+# Pandas cheat sheet: https://pandas.pydata.org/Pandas_Cheat_Sheet.pdf
+
 # Will be used to train neural network, as well as evaluate NN
 def getFog16Data():
     df = pd.read_csv("File that ben is creating.csv")
@@ -17,13 +19,35 @@ def getFog16Data():
         # within DataFrame
         # Save modified DataFrame to csv
 
-    # Get DCT power spectrums in both x and y
+    # Iterate through infrared and visible pictures to...
+        # Get DCT power spectrums in both x and y
+        # Probably save this in a csv file too, something like each row is a power spectrum (and there are 4 sheets for both axes + both infrared/visible?)
 
     # Get Lidar ping distribution and depth maps
+        # Also save these in a csv file
 
-    # Split into 80-20 (pick random rows i guess?)
+    # Add everything into some VERY large dictionary like "all_data"
+
+    # Split into 80-20 (pick random rows i guess?) for training and test
 
     # Return training set and test set
+    return (training_set, test_set)
+
+        # Format for both should look like this:
+        # Do NOT change the name of the keys!
+    '''
+    training_set["inputs"] = 
+             {"Lidar_Depth_Map": <something>,
+            "Lidar_Ping_Distribution": etc.,
+            "Visible_Laplacian_Variance": <something>,
+            "Visible_Power_Spectrum_X": you get the point...,
+            "Visible_Power_Spectrum_Y": fakeVisibleDCT_Y,
+            "Infrared_Laplacian_Variance": fakeInfraredLapVar,
+            "Infrared_Power_Spectrum_X": fakeInfraredDCT_X,
+            "Infrared_Power_Spectrum_Y": fakeInfraredDCT_Y,}
+
+    training_set["outputs"] = {"MOR_and_LWC_estimates": np.random.rand(numCorrelatedImages, 2)}
+    '''
 
 
 # Will be used *only* to evaluate neural network
