@@ -1,7 +1,7 @@
 clc; clear; close all; 
 
 % inputs
-framepath = 'C:\Users\benrd\Box\Glenn I Data\Fog Data\fog01\fog01\Lidar';
+framepath = 'C:\Users\benrd\Box\Glenn I Data\Andy Blah\fog16_condensed';
 filetype = 'pntcloud'; %set either to 'image' or 'pntcloud' not set up for boson or img yet
 csvname = append('*',filetype,'*.csv');
 len = 10; % !!!(set = 0 if you want all files to be read)!! [specifies how many files from the start to read
