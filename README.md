@@ -11,8 +11,6 @@
 3. Extract the time-corresponding transmissometer/Malvern readings for each experiment
 - This is stored in the `fog_chamber_environment` folder (rather than the baseline01, fog01, etc. folders)
 4. Filter the transmissmeter/Malvern readings to reduce noise
-- 3 and 4 could be swapped? Maybe?
-- It might actually be better to do 4 before 3 due to filters being wonky at the edges
 
 
 ### *Part of our ML framework / neural network architecture*
