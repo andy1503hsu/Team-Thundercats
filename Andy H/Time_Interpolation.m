@@ -1,7 +1,7 @@
 clear
 clc
 close all
-%% Try to condense experimental imagery data
+%% Condense experimental imagery data
 % No need to have so many visible/infrared images since lidar took pictures
 % at lower frequency
 

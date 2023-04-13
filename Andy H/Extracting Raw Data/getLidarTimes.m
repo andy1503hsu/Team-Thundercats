@@ -11,7 +11,7 @@ function [first_time, times_zeroed, sorted_lidar_csvs] = getLidarTimes(lidar_csv
     % 7-8th: Second, Millisecond (not nanosecond!)
 
     % This function assumes that the year/month/day is constant per one
-    % experiment (I highly doubt they ran tests overnight). In other words,
+    % experiment (No tests were run overnight). In other words,
     % only numbers 1, 5, 6, 7, and 8 change.
 
     % Furthermore, the frame number is rather relevant for timing. So only

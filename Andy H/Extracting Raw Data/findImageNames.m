@@ -2,11 +2,6 @@ function imagery_data = findImageNames(type, experimentName)
     fprintf("%20s %-10s\n", "Looking at type:", type)
     fprintf("%20s %-10s\n\n", "Experiment name:", experimentName)
     
-    % Note: On windows, dir() is case insensitive (easier for us), but on
-    % Linux dir() is case sensitive (BAD)
-       % Chances are TACC is on Linux, will keep in mind for later
-    % https://www.mathworks.com/help/matlab/matlab_env/specify-file-names.html
-    
     if type == "baseline"
         path_to_images = "Glenn I Data\Baseline Data\" + experimentName + "\" + experimentName;
         addpath(genpath(path_to_images))

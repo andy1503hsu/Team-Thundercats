@@ -17,7 +17,6 @@ csvsPath = boxFolder + "Glenn I Data\Csvs for Neural Network\\"
 # Will be used to train neural network, as well as evaluate NN
 def getFog16Data():
     df = pd.read_csv(csvsPath + "fog16_data_withLapVars.csv")
-    pathToImages = boxFolder + "Glenn I Data\\Post-Time Interpolation Data\\fog16_condensed\\"
 
     # If laplacian variance column doesn't exist yet...
         # Retrieve laplacian variance of both Infrared and Visible images, store
@@ -25,14 +24,18 @@ def getFog16Data():
         # Save modified DataFrame to csv
     if 'visibleLapVar' not in df.columns:
 
+        pathToImages = boxFolder + "Glenn I Data\\Post-Time Interpolation Data\\fog16_condensed\\"
+
         visVariances = [laplace_filtering(getPixels(pathToImages + imageName, grayscale=True)) for imageName in df['visibleBitmap']]
         df['visibleLapVar'] = visVariances
         # df.to_csv(csvsPath + "fog16_dataEdited1.csv")
 
         infraredVariances = [laplace_filtering(getPixels(pathToImages + imageName)) for imageName in df['infraredImage']]
-        df['infaredLapVar'] = infraredVariances
+        df['infraredLapVar'] = infraredVariances
 
         df.to_csv(csvsPath + "fog16_dataEdited2.csv")  # Rename after saving
+        print("Wrote .csv file with Laplacian variance of visible and infrared pictures.")
+        return
 
     # # Get DCT power spectrums in both x and y
 
@@ -53,6 +56,14 @@ def getFog16Data():
     # Get Lidar ping distribution
     (_, lidarPingDist) = read_csvs(csvsPath + "fog16_LidarDepthDist.csv")
 
+    # Get first and last image names
+    firstImageIndex = re.findall("\d+", visibleImages[0]+infraredImages[0]+lidarImages[0])
+    lastImageIndex = re.findall("\d+", visibleImages[-1]+infraredImages[-1]+lidarImages[-1])
+
+    # These should be the same to ensure indices are consistent
+    assert firstImageIndex[0] == firstImageIndex[1] == firstImageIndex[2]
+    assert lastImageIndex[0] == lastImageIndex[1] == lastImageIndex[2]
+
     # Normalize Inputs
     (visibleLapVar_normalized, visibleLapVar_normInfo) = normalizeData(df['visibleLapVar'].values)
     (visiblePSD_x_normalized, visiblePSD_x_normInfo) = normalizeData(visiblePSD_x)
@@ -64,20 +75,22 @@ def getFog16Data():
 
     (lidarDepthMaps_normalized, lidarDepthMaps_normInfo) = normalizeData(lidarDepthMaps, 0, 255)
     (lidarPingDist_normalized, lidarPingDist_normInfo) = normalizeData(lidarPingDist)
+    input_normInfo = [visibleLapVar_normInfo, visiblePSD_x_normInfo, 
+                      visiblePSD_y_normInfo, infraredLapVar_normInfo,
+                      infraredPSD_x_normInfo, infraredPSD_x_normInfo,
+                      infraredPSD_y_normInfo, lidarDepthMaps_normInfo,
+                      lidarPingDist_normInfo]
 
-    # Add everything into some VERY large dictionary like "all_data"
+    # Normalize outputs
+    (MOR_normalized, MOR_normInfo) = normalizeData(df["MOR532_m_filt"])
+    (LWC_normalized, LWC_normInfo) = normalizeData(df["LWC_gm3_filt"])
+    df["MOR_normalized"] = MOR_normalized
+    df["LWC_normalized"] = LWC_normalized
 
     # Split into 80-20 for training and test
     trainProportion = 0.8
 
-    # Get first and last image names
-    firstImageIndex = re.findall("\d+", visibleImages[0]+infraredImages[0]+lidarImages[0])
-    lastImageIndex = re.findall("\d+", visibleImages[-1]+infraredImages[-1]+lidarImages[-1])
-    # These should be the same
-    assert firstImageIndex[0] == firstImageIndex[1] == firstImageIndex[2]
-    assert lastImageIndex[0] == lastImageIndex[1] == lastImageIndex[2]
-
-    firstImageIndex = int(firstImageIndex[0])
+    firstImageIndex = int(firstImageIndex[0]) + 50
     lastImageIndex = int(lastImageIndex[0])
 
     trainSetIndexes = []
@@ -103,7 +116,7 @@ def getFog16Data():
     train_set["inputs"]["Lidar_Depth_Map"] = lidarDepthMaps_normalized[trainSetIndexes, :]
     train_set["inputs"]["Lidar_Ping_Distribution"] = lidarPingDist_normalized[trainSetIndexes, :]
 
-    train_set["outputs"]["MOR_and_LWC_estimates"] = df.loc[trainSetIndexes, ["MOR532_m_filt", "LWC_gm3_filt"]].values
+    train_set["outputs"]["MOR_and_LWC_estimates"] = df.loc[trainSetIndexes, ["MOR_normalized", "LWC_normalized"]].values
 
 
     test_set = {"inputs": {}, "outputs": {}, 'indexes': testSetIndexes}
@@ -118,10 +131,10 @@ def getFog16Data():
     test_set["inputs"]["Lidar_Depth_Map"] = lidarDepthMaps_normalized[testSetIndexes, :]
     test_set["inputs"]["Lidar_Ping_Distribution"] = lidarPingDist_normalized[testSetIndexes, :]
 
-    test_set["outputs"]["MOR_and_LWC_estimates"] = df.loc[testSetIndexes, ["MOR532_m_filt", "LWC_gm3_filt"]].values
+    test_set["outputs"]["MOR_and_LWC_estimates"] = df.loc[testSetIndexes, ["MOR_normalized", "LWC_normalized"]].values
 
     # Return training set and test set
-    return (train_set, test_set)
+    return (train_set, test_set, MOR_normInfo, LWC_normInfo, input_normInfo)
 
         # Format for both should look like this:
         # Do NOT change the name of the keys!
@@ -143,31 +156,95 @@ def getFog16Data():
 # Will be used *only* to evaluate neural network
 # Baseline07 and 08 do NOT have transmissometer/Malvern data, so they cannot be
 # used for training
-def getBaselineData(testNumber):
+def getBaselineData(testName, input_normInfo):
 
-    if testNumber == 7:
-        df = pd.read_csv("Another file ben is creating.csv")
-    elif testNumber == 8:
-        df = pd.read_csv("Another another file ben is creating.csv")
-    else:
-        print("Invalid baseline test number.")
-        return
+    df = pd.read_csv(csvsPath + testName + "_data_withLapVars.csv")
 
     # If laplacian variance column doesn't exist yet...
-            # Retrieve laplacian variance of both Infrared and Visible images, store
-            # within DataFrame
-            # Save modified DataFrame to csv
+        # Retrieve laplacian variance of both Infrared and Visible images, store
+        # within DataFrame
+        # Save modified DataFrame to csv
+    if 'visibleLapVar' not in df.columns:
 
-    # Get DCT power spectrums in both x and y
+        pathToImages = boxFolder + "Glenn I Data\\Post-Time Interpolation Data\\" + testName + "_condensed\\"
 
-    # Get Lidar ping distribution and depth maps
+        visVariances = [laplace_filtering(getPixels(pathToImages + imageName, grayscale=True)) for imageName in df['visibleBitmap']]
+        df['visibleLapVar'] = visVariances
+        # df.to_csv(csvsPath + testName + "_dataEdited1.csv")
 
-    # Return dataset (will be exclusively used for evalulation/testing)
+        infraredVariances = [laplace_filtering(getPixels(pathToImages + imageName)) for imageName in df['infraredImage']]
+        df['infraredLapVar'] = infraredVariances
+
+        df.to_csv(csvsPath + testName + "_dataEdited2.csv")  # Rename after saving
+
+        print("Wrote .csv file with Laplacian variance of visible and infrared pictures.")
+        return
+
+    # # Get DCT power spectrums in both x and y
+
+    pathtoPSDs = csvsPath + "\\POWER SPECTRUMS\\"
+    (visibleImages, visiblePSD_x) = read_csvs(pathtoPSDs + testName + "_VisibleX.csv")
+
+    # Eliminate columns with negative infinity
+    visiblePSD_x = visiblePSD_x[:, :-1]
+    visiblePSD_x = np.delete(visiblePSD_x, 128, axis=1)
+
+    (_, visiblePSD_y) = read_csvs(pathtoPSDs + testName + "_VisibleY.csv")
+    (infraredImages, infraredPSD_x) = read_csvs(pathtoPSDs + testName + "_InfraredX.csv")
+    (_, infraredPSD_y) = read_csvs(pathtoPSDs + testName + "_InfraredY.csv")
+
+    # Get Lidar depth maps
+    (lidarImages, lidarDepthMaps) = read_csvs(csvsPath + testName + "_depthMapsCombined.csv")
+
+    # Get Lidar ping distribution
+    (_, lidarPingDist) = read_csvs(csvsPath + testName + "_LidarDepthDist.csv")
+
+    # Get first and last image names
+    firstImageIndex = re.findall("\d+", visibleImages[0]+infraredImages[0]+lidarImages[0])
+    lastImageIndex = re.findall("\d+", visibleImages[-1]+infraredImages[-1]+lidarImages[-1])
+
+    # These should be the same to ensure indices are consistent
+    assert firstImageIndex[0] == firstImageIndex[1] == firstImageIndex[2]
+    assert lastImageIndex[0] == lastImageIndex[1] == lastImageIndex[2]
+
+    # Normalize Inputs
+    (visibleLapVar_normalized, _) = normalizeData(df['visibleLapVar'].values, normInfo=input_normInfo[0])
+    (visiblePSD_x_normalized, _) = normalizeData(visiblePSD_x, normInfo=input_normInfo[1])
+    (visiblePSD_y_normalized, _) = normalizeData(visiblePSD_y, normInfo=input_normInfo[2])
+
+    (infraredLapVar_normalized, _) = normalizeData(df['infraredLapVar'].values, normInfo=input_normInfo[3])
+    (infraredPSD_x_normalized, _) = normalizeData(infraredPSD_x, normInfo=input_normInfo[4])
+    (infraredPSD_y_normalized, _) = normalizeData(infraredPSD_y, normInfo=input_normInfo[5])
+
+    (lidarDepthMaps_normalized, _) = normalizeData(lidarDepthMaps, normInfo=input_normInfo[6])
+    (lidarPingDist_normalized, _) = normalizeData(lidarPingDist, normInfo=input_normInfo[7])
+
+    # Baseline data is not used in training, so no train-test split is needed
+
+    dataset = {"inputs": {}}
+    dataset["inputs"]["Visible_Laplacian_Variance"] = visibleLapVar_normalized
+    dataset["inputs"]["Visible_Power_Spectrum_X"] = visiblePSD_x_normalized
+    dataset["inputs"]["Visible_Power_Spectrum_Y"] = visiblePSD_y_normalized
+
+    dataset["inputs"]["Infrared_Laplacian_Variance"] = infraredLapVar_normalized
+    dataset["inputs"]["Infrared_Power_Spectrum_X"] = infraredPSD_x_normalized
+    dataset["inputs"]["Infrared_Power_Spectrum_Y"] = infraredPSD_y_normalized
+    
+    dataset["inputs"]["Lidar_Depth_Map"] = lidarDepthMaps_normalized
+    dataset["inputs"]["Lidar_Ping_Distribution"] = lidarPingDist_normalized
+
+    # Return dataset
+    return dataset
 
 
 # Normalize data so all values are in betwen 0 and 1 inclusive. Return new
 # values, plus the offset and scale needed to do the normalization
-def normalizeData(data, minimum=None, maximum=None):
+def normalizeData(data, minimum=None, maximum=None, normInfo=None):
+
+    if normInfo is not None:
+        normalizedData = (data - normInfo["offset"]) / normInfo["scale"]
+        return (normalizedData, {})
+    
     if minimum is None:
         minimum = np.min(data)
 
@@ -215,3 +292,4 @@ def getPixels(img_dir, grayscale=False):
 
 if __name__ == "__main__":
     (train_set, test_set) = getFog16Data()
+    # baseline07_data = getBaselineData("baseline07")

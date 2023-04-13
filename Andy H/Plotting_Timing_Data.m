@@ -1,3 +1,6 @@
+% Given an experiment name, plot the timing of all data recordings as a
+% function of time since start of the experiment
+
 clear
 clc
 close all

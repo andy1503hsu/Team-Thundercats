@@ -52,8 +52,8 @@ function imageryData = getTMData(imageryData)
     % meanVD_interpolated = interpolateData(time_first3, meanVD, imageSeconds);
     % medianVD_interpolated = interpolateData(time_first3, medianVD, imageSeconds);
 
-    imageryData.mor532_meter = mor532_interpolated;
-    imageryData.LWC_gramPerMeter3 = LWC_interpolated;
+    imageryData.mor532_unfiltered_m = mor532_interpolated;
+    imageryData.LWC_unfiltered_gm3 = LWC_interpolated;
 
 
     % imageryData.meanVD_microns = meanVD_interpolated;    

@@ -1,6 +1,5 @@
 %% Get camera timings for visible, IR, and lidar
-% Also sort the image names into time-ascending order (alphabetical order
-% is NOT time-ascending order due to reasons I can explain later)
+% Also sort the image names into time-ascending order
 
 function [imagery_data, image_timings] = getCameraTimings(imagery_data)
     [first_time_visible, times_zeroed_visible, sorted_visible] = getVisibleAndIRTimes(imagery_data.visible);
@@ -15,7 +14,7 @@ function [imagery_data, image_timings] = getCameraTimings(imagery_data)
     datetime([first_time_visible; first_time_infrared; first_time_lidar], "ConvertFrom", "posixtime")
     %}
 
-    %% Adjust so cameras are on lidar time zone
+    %% Adjust timing data so all three cameras are on lidar time zone
     % Adjustment to "correct" time zone (transmissometer / Malvern time
     % zone) will occur post-interpolation
 
@@ -30,13 +29,6 @@ function [imagery_data, image_timings] = getCameraTimings(imagery_data)
         first_time_visible = first_time_visible + hour_diff*60*60;
         first_time_infrared = first_time_infrared + hour_diff*60*60;
     end % If hour_diff == 0, do nothing
-
-    
-    %first_time_visible = first_time_visible - 6*60*60; % 6 hours ahead of trans/malvern data (the actually accurate one)
-    %first_time_infrared = first_time_infrared - 6*60*60; % 6 hours ahead of trans/malvern data (the actually accurate one)
-    
-    %% UGH SOMETHING CHANGED WITH THE TIMING ISSUE, fog16 doesn't require this 1 hr adjustment for lidar
-    %first_time_lidar = first_time_lidar + 60*60; % 1 hour behind of trans/malvern data (the actually accurate one)
 
     minTimes = [first_time_visible, first_time_infrared, first_time_lidar];
     
@@ -65,7 +57,7 @@ function [imagery_data, image_timings] = getCameraTimings(imagery_data)
         
     end
 
-    % TIMES AREN'T SORTED because of stupid reasons but we'll just do it ourselves
+    % Sort timings
 
     image_timings.visible = times_zeroed_visible;
     image_timings.infrared = times_zeroed_infrared;

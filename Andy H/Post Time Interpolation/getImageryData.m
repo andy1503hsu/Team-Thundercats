@@ -9,7 +9,7 @@ function [imagery_data, other] = getImageryData(experimentName)
 
     if isempty(files)
         disp("No experiment corresponds to this folder. Code terminated.")
-        disp("Make sure this experiment has been time interpolated before using the getData.m function.")
+        disp("Make sure this experiment has been time interpolated before using the getImageryData.m function.")
         return
     end
     
@@ -22,13 +22,14 @@ function [imagery_data, other] = getImageryData(experimentName)
     files = string(extractfield(files, "name"))';
     files(files == "." | files == "..") = [];  % Eliminate "." (refers to itself) and ".." (parent folder)
     files(files == "test_copyfile.csv") = [];  % Ignore this .csv
-    files(files == "test_copyfile.tiff") = [];  % Ignore this .csv
+    files(files == "test_copyfile.tiff") = [];  % Ignore this .tiff
+    files(files == "LidarDepthDist.csv") = [];  % Ignore this .csv
 
     % Time interpolation ensures first and last index of all three types of
     % images are the same
-    [visible, ~, ~] = sortImageNames(files(endsWith(files, ".jpg") & startsWith(files, "Visible")));
+    [visibleBitMaps, ~, ~] = sortImageNames(files(endsWith(files, ".bmp") & startsWith(files, "Visible")));
     [infrared, ~, ~] = sortImageNames(files(endsWith(files, ".tiff") & startsWith(files, "Infrared")));
-    [lidar, firstIndex, lastIndex] = sortImageNames(files(endsWith(files, ".csv") & startsWith(files, "Lidar")));
+    [lidarDepthMap, firstIndex, lastIndex] = sortImageNames(files(endsWith(files, ".csv") & startsWith(files, "Lidar")));
 
     indexes = firstIndex:lastIndex;
     other.imageNumbers = indexes;
@@ -66,10 +67,10 @@ function [imagery_data, other] = getImageryData(experimentName)
 
     %imageDatetime_NASA = startDatetime1 + seconds(imageCaptureTimes);
     imageDatetime = startDatetime_Images + seconds(timeSinceStart);
-    imagery_data = table(imageDatetime, timeSinceStart, visible, infrared, lidar);
+    imagery_data = table(imageDatetime, timeSinceStart, visibleBitMaps, infrared, lidarDepthMap);
 
     disp("Image names and corresponding datetimes put into imageryData.")
-    fprintf("\n%40s %-10d\n", "Number of images per camera:", length(visible))
+    fprintf("\n%40s %-10d\n", "Number of images per camera:", length(visibleBitMaps))
     fprintf("%40s %-.3f Hz\n\n", "Frequency of Time-Interpolated Images:", 1/mean(diff(timeSinceStart)))
 end
 

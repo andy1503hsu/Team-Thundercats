@@ -6,8 +6,6 @@ function [instrument_data, timing_info] = getInstrumentData(experimentName, timi
     secondsRange = sum(hr.*3600 + min.*60 + sec, 2);
     binRange = discretize(secondsRange, fog_data.time);
 
-    %binRange(1) = binRange(1); % "First" trans/Malvern reading is *after* first image, eliminates need to shift image timings
-    % Not good in the grand scene of things but for now
     if any(isnan(binRange)) % No trans/Malvern data in this experiment
         timing_info.transMalvern = [];
         instrument_data = struct;
