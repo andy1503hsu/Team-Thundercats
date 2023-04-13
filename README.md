@@ -16,9 +16,9 @@
 ### *Part of our ML framework / neural network architecture*
 1. **Feature Extraction**
 - Develop algorithms to feature extract a quantification of blurriness from visible, infrared, and lidar data
-- Also involves things like cropping out the walls from lidar point clouds
-2. General neural network design -- Answer questions like:
+- Crop out walls from lidar point clouds
+2. General neural network design -- Answer questions such as:
 - After feature extraction, how many layers do we want to the neural network before it gives us the estimated transmissometer/Malvern data?
 - What optimizer/loss function do we want to use?
 
-### Then train the neural network!
+### Train the neural network!
