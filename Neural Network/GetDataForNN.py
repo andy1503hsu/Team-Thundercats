@@ -90,13 +90,14 @@ def getFog16Data():
     # Split into 80-20 for training and test
     trainProportion = 0.8
 
-    firstImageIndex = int(firstImageIndex[0]) + 50
+    firstImageIndex = int(firstImageIndex[0])
     lastImageIndex = int(lastImageIndex[0])
 
     trainSetIndexes = []
     testSetIndexes = []
 
-    for index in range(firstImageIndex, lastImageIndex+1, 1):
+    # Ignore first 60 images, since this is when fog was entering the chamber
+    for index in range(firstImageIndex + 60, lastImageIndex+1, 1):
         randNum = np.random.random()
         if randNum <= trainProportion:
             # Convert from image *number* to index within time correlation
@@ -136,8 +137,6 @@ def getFog16Data():
     # Return training set and test set
     return (train_set, test_set, MOR_normInfo, LWC_normInfo, input_normInfo)
 
-        # Format for both should look like this:
-        # Do NOT change the name of the keys!
     '''
     train_set["inputs"] = 
              {"Lidar_Depth_Map": <something>,

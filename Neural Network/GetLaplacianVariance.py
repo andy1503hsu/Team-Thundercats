@@ -1,4 +1,5 @@
-# Function used to retrieve data needed to train and evaluate neural network
+# Function used to get laplacian variance of infrared and visible images and
+# save this information in a .csv
 
 import pandas as pd
 import numpy as np
@@ -20,20 +21,16 @@ csvsPath = boxFolder + "Glenn I Data\Csvs for Neural Network\\"
 def getBaselineData(testNumber):
 
     if testNumber == 7:
-        df = pd.read_csv(csvsPath + "baseline07_dataTest.csv")
+        df = pd.read_csv(csvsPath + "baseline07_data_original.csv")
         pathToImages = boxFolder + "Glenn I Data\\Post-Time Interpolation Data\\baseline07_condensed\\"
     elif testNumber == 8:
-        df = pd.read_csv(csvsPath + "baseline08_dataTest.csv")
+        df = pd.read_csv(csvsPath + "baseline08_data_original.csv")
         pathToImages = boxFolder + "Glenn I Data\\Post-Time Interpolation Data\\baseline08_condensed\\"
     else:
         print("Invalid baseline test number.")
         return
 
     if 'visibleLapVar' not in df.columns:
-
-        # df['Visible_LapVar'] = laplace_filtering(getPixels(pathToImages+df.visibleBitmap))
-        # visibleInfo = []
-        # infraredInfo = []
 
         visVariances = [laplace_filtering(getPixels(pathToImages + imageName, grayscale=True)) for imageName in df['visibleBitmap']]
         df['visibleLapVar'] = visVariances
